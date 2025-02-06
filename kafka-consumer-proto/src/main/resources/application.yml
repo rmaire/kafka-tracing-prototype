@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: kafka-consumer-proto
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/kafkaproto
+    schema: public
+    username: admin
+    password: secret
+  flyway:
+    user: admin
+    password: secret
+    schemas: public
+    url: jdbc:postgresql://localhost:5432/kafkaproto
+
+#logging:
+#  level:
+#    org:
+#      flywaydb: DEBUG
+#    db:
+#      migration: DEBUG

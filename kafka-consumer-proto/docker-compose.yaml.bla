@@ -1,0 +1,53 @@
+version: "3.9"
+services:
+    kafka-1:
+        image: docker.io/bitnami/kafka:3.6
+        ports:
+            - 9092:9092
+        volumes:
+            - "kafka_data:/bitnami"
+        networks:
+            internalnet:
+                ipv4_address: 172.20.90.11
+        environment:
+            - KAFKA_CFG_NODE_ID=0
+            - KAFKA_CFG_PROCESS_ROLES=controller,broker
+            - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+            - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+            - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka-1:9093
+            - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+    postgres-1:
+        image: postgres:11
+        container_name: postgres-1
+        hostname: postgres-1
+        ports:
+            - 5432:5432
+        networks:
+            internalnet:
+                ipv4_address: 172.20.90.9
+        environment:
+            - POSTGRES_PASSWORD=ref_dev_23
+        volumes:
+            - "postgres_data:/var/lib/postgresql/data"
+    pgadmin:
+        image: dpage/pgadmin4:latest
+        container_name: pgadmin-1
+        hostname: pgadmin-1
+        ports:
+            - 8099:80
+        networks:
+            internalnet:
+                ipv4_address: 172.20.90.10
+        environment:
+            - PGADMIN_DEFAULT_EMAIL=roman.maire@besonet.ch
+            - PGADMIN_DEFAULT_PASSWORD=ref_dev_23
+volumes:
+    kafka_data:
+        driver: local
+    postgres_data:
+        driver: local
+networks:
+    internalnet:
+        ipam:
+            config:
+                - subnet: 172.20.90.0/16
