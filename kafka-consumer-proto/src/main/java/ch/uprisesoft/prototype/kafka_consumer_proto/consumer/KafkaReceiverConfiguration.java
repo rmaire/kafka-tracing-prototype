@@ -1,6 +1,8 @@
 package ch.uprisesoft.prototype.kafka_consumer_proto.consumer;
 
 import ch.uprisesoft.prototype.kafka_consumer_proto.producer.CustomerId;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.kafka.core.reactive.ReactiveKafkaConsumerTemplate;
@@ -8,6 +10,7 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import reactor.kafka.receiver.MicrometerConsumerListener;
 import reactor.kafka.receiver.ReceiverOptions;
 
 import java.util.Collections;
@@ -20,6 +23,9 @@ public class KafkaReceiverConfiguration {
 	@Bean
 	public ReceiverOptions<String, Customer> kafkaCustomerReceiver(KafkaProperties kafkaProperties) {
 
+		MeterRegistry registry = new SimpleMeterRegistry();
+		MicrometerConsumerListener consumerListener = new MicrometerConsumerListener(registry);
+
 		Map<String, Object> config = new HashMap<>();
 		config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:29092");
 		config.put(ConsumerConfig.GROUP_ID_CONFIG, "reactive-kafka");
@@ -31,6 +37,8 @@ public class KafkaReceiverConfiguration {
 		config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
 		ReceiverOptions<String, Customer> basicReceiverOptions = ReceiverOptions.create(config);
+		basicReceiverOptions.consumerListener(consumerListener);
+
 		return basicReceiverOptions.subscription(Collections.singletonList("new-customer"));
 
 	}

@@ -54,12 +54,16 @@ services:
       echo -e 'Successfully created the following topics:'
       kafka-topics --bootstrap-server kafka:9092 --list
       "
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: pgadmin-1
-    hostname: pgadmin-1
+  zipkin:
+    image: 'openzipkin/zipkin'
     ports:
-      - 8099:80
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=roman.maire@besonet.ch
-      - PGADMIN_DEFAULT_PASSWORD=ref_dev_23
+      - 9411:9411
+#  pgadmin:
+#    image: dpage/pgadmin4:latest
+#    container_name: pgadmin-1
+#    hostname: pgadmin-1
+#    ports:
+#      - 8099:80
+#    environment:
+#      - PGADMIN_DEFAULT_EMAIL=roman.maire@besonet.ch
+#      - PGADMIN_DEFAULT_PASSWORD=ref_dev_23
