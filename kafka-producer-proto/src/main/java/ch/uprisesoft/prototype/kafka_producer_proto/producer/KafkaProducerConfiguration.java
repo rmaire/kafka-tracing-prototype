@@ -51,17 +51,4 @@ public class KafkaProducerConfiguration {
 
 		return template;
 	}
-
-/*	@Bean
-	public KafkaTemplate<String, Customer> customerKafkaTemplate(
-			ProducerFactory<String, Customer> messageProducerFactory) {
-
-		log.info("============== customerKafkaTemplate() ==============");
-
-		KafkaTemplate<String, Customer> template = new KafkaTemplate<>(messageProducerFactory);
-		template.setObservationEnabled(true);
-
-		return template;
-	}*/
-
 }

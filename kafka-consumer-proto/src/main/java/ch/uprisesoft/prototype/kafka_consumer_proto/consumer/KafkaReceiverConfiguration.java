@@ -3,6 +3,7 @@ package ch.uprisesoft.prototype.kafka_consumer_proto.consumer;
 import ch.uprisesoft.prototype.kafka_consumer_proto.producer.CustomerId;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import io.micrometer.observation.ObservationRegistry;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.kafka.core.reactive.ReactiveKafkaConsumerTemplate;
@@ -20,11 +21,15 @@ import java.util.Map;
 @Configuration
 public class KafkaReceiverConfiguration {
 
+	private final ObservationRegistry observationRegistry;
+
+	public KafkaReceiverConfiguration(ObservationRegistry observationRegistry) {
+		this.observationRegistry = observationRegistry;
+	}
+
 	@Bean
 	public ReceiverOptions<String, Customer> kafkaCustomerReceiver(KafkaProperties kafkaProperties) {
 
-		MeterRegistry registry = new SimpleMeterRegistry();
-		MicrometerConsumerListener consumerListener = new MicrometerConsumerListener(registry);
 
 		Map<String, Object> config = new HashMap<>();
 		config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:29092");
@@ -37,7 +42,7 @@ public class KafkaReceiverConfiguration {
 		config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
 		ReceiverOptions<String, Customer> basicReceiverOptions = ReceiverOptions.create(config);
-		basicReceiverOptions.consumerListener(consumerListener);
+		basicReceiverOptions.withObservation(observationRegistry);
 
 		return basicReceiverOptions.subscription(Collections.singletonList("new-customer"));
 

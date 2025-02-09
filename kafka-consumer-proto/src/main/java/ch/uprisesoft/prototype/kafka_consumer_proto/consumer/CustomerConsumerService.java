@@ -6,8 +6,10 @@ import ch.uprisesoft.prototype.kafka_consumer_proto.producer.CustomerIdProducerS
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.kafka.core.reactive.ReactiveKafkaConsumerTemplate;
+import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -40,6 +42,10 @@ public class CustomerConsumerService implements CommandLineRunner {
 						consumerRecord.topic(),
 						consumerRecord.offset())
 				)
+				.doOnNext(consumerRecord -> {
+					log.info("CORRELATION ID: {}", consumerRecord.headers().headers(KafkaHeaders.CORRELATION_ID).iterator().next().value().toString());
+					MDC.put("traceId", consumerRecord.headers().headers(KafkaHeaders.CORRELATION_ID).iterator().next().value().toString());
+				})
 				.map(ConsumerRecord::value)
 				.doOnNext(message -> log.info("successfully consumed {}={}", Customer.class.getSimpleName(), message))
 				.doOnError(throwable -> log.error("something bad happened while consuming : {}", throwable.getMessage()));
@@ -63,8 +69,8 @@ public class CustomerConsumerService implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 		consumeCustomer().subscribe(record -> {
-			Customer customer = repo.save(record).block();
-			idProducer.send(new CustomerId(customer.getId()));
+			//Customer customer = repo.save(record).block();
+			//idProducer.send(new CustomerId(customer.getId()));
 		});
 
 		consumeCustomerId().subscribe(record -> {
